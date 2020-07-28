@@ -1,0 +1,28 @@
+.datetimepicker-footer {
+  display: flex;
+  -webkit-box-flex: 1;
+  flex: 1;
+  -webkit-box-pack: space-evenly;
+  justify-content: space-evenly;
+  margin: 0;
+}
+
+.datetimepicker-selection-start {
+  display: flex;
+  align-items: center;
+  border-radius: 3px;
+  background: rgba(242, 241, 238, 0.6);
+  height: 28px;
+  line-height: 1.2;
+  padding-left: 8px;
+  padding-right: 8px;
+  flex-basis: 50%;
+  box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px inset, rgba(15, 15, 15, 0.1) 0px 1px 1px inset;
+  flex-grow: 1;
+  font-size: 14px;
+}
+
+.bg-blue {
+  background: rgba(46, 170, 220, 0.15) !important;
+  box-shadow:rgb(46, 170, 220) 0px 0px 0px 2px inset !important;
+}

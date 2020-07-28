@@ -1,9 +1,53 @@
 <div class="calendar">
+  <div>
+    <div (click)="changeMode('start')" class="datetimepicker-selection-start" [ngClass]="{'bg-blue': mode === 'start' && isRange}">
+      <div *ngIf="startDate">
+        {{ startDate.format('D MMM, YYYY') }}
+      </div>
+      <div *ngIf="!startDate">
+        Pick a start date
+      </div>
+      <div *ngIf="hasTime">
+        <div *ngIf="startDate">
+          <!-- TODO: Implement two-way binding -->
+          <input [ngModel]="stHours" type="number" min="1" max="12" (change)="updateHours()"/>
+          <input [ngModel]="stMinutes" type="number" min="0" max="60" (change)="updateMinutes()"/>
+          <select [ngModel]="stFormat">
+            <option *ngFor="let format of formats" (change)="updateAMPM(format)"> {{ format }}</option>
+          </select>
+        </div>
+        <div *ngIf="!startDate">
+          --
+        </div>
+      </div>
+    </div>
+    <div (click)="changeMode('end')" *ngIf="isRange" class="datetimepicker-selection-start" [ngClass]="{'bg-blue': mode === 'end' && isRange}"> 
+      <div *ngIf="endDate">
+        {{ endDate.format('D MMM, YYYY') }}
+      </div>
+      <div *ngIf="!endDate">
+        Pick an end date
+      </div>
+      <div *ngIf="hasTime">
+        <div *ngIf="endDate">
+          <!-- TODO: Implement two-way binding -->
+          <input [ngModel]="etHours" type="number" min="1" max="12" (change)="updateHours()"/>
+          <input [ngModel]="etMinutes" type="number" min="0" max="60" (change)="updateMinutes()"/>
+          <select [ngModel]="etFormat">
+            <option *ngFor="let format of formats" (change)="updateAMPM(format)"> {{ format }}</option>
+          </select>
+        </div>
+        <div *ngIf="!endDate">
+          --
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="calendar-nav">
     <div class="calendar-nav-previous-month">
       <button class="button is-text" 
         (click) = "changeNavMonth(-1)"
-        [disabled] = "!canChangeNavMonth(-1)">
+        [disabled] = "!canAccessPrevious">
         <i class="fa fa-chevron-left" ></i>
       </button>
     </div>
@@ -11,7 +55,7 @@
     <div class="calendar-nav-next-month">
       <button class="button is-text" 
         (click) = "changeNavMonth(1)"
-        [disabled] = "!canChangeNavMonth(1)">
+        [disabled] = "!canAccessNext">
         <i class="fa fa-chevron-right" ></i>
       </button>
     </div>
@@ -23,18 +67,241 @@
         {{day}}
       </div>
     </div>
-    <div class="calendar-body">
-
-      <div *ngFor = "let day of gridArr" class="calendar-date" [class.is-disabled] = "!day.available">
-        <button *ngIf = "day.value !== 0" class="date-item" (click) = "selectDay(day)">{{day.value}}</button>
-        <button *ngIf = "day.value === 0" class="date-item"></button>
+    <div class="calendar-body" *ngIf="isRange; else notRange">
+      <ng-container *ngIf="gridArr">
+        <div *ngFor = "let day of gridArr[currentYear][currentMonth]" class="calendar-date"
+          [ngClass]="{
+          'is-disabled': !day.available,
+          'calendar-range': day.inRange, 
+          'calendar-range-start': day.value === startDay?.value &&  day.month === startDay?.month && day.year === startDay?.year ,
+          'calendar-range-end': day.value === endDay?.value && day.month === endDay?.month && day.year === endDay?.year}" >
+          <button 
+            *ngIf = "day.value !== 0" 
+            class="date-item"
+            [ngClass]="{'is-active': day.isActive, 'is-today': day.isToday}"
+            (click) = "selectDay(day)"> {{day.value}}</button>
+          <button *ngIf = "day.value === 0" class="date-item"></button>
       </div>
-
+      </ng-container>
+    </div>
+    <ng-template #notRange>
+      <div class="calendar-body">
+        <div *ngFor = "let day of gridArr[currentYear][currentMonth]" class="calendar-date"
+          [ngClass]="{'is-disabled': !day.available }">
+          <button 
+            *ngIf = "day.value !== 0" 
+            class="date-item" 
+            [ngClass]="{'is-active': day.isActive, 'is-today': day.isToday}"
+            (click) = "selectDay(day)">{{day.value}}</button>
+          <button *ngIf = "day.value === 0" class="date-item"></button>
+        </div>
+      </div>
+    </ng-template>
+    <div>
+      <input type="checkbox" [(ngModel)]="isRange" (change)="handleModeChange()">
+      <label>
+        Include end date
+      </label>
+    </div>
+    <div>
+      <input type="checkbox" [(ngModel)]="hasTime">
+      <label>
+        Include time
+      </label>
+    </div>
+    <div class="datetimepicker-footer">
+      <button type="button" class="datetimepicker-footer-clear has-text-danger button is-small is-text" (click)="clear()">Clear All</button>
     </div>
   </div>
 </div>
 
+<!-- 
+      <div class="datetimepicker-header is-date-only">
+		<div class="datetimepicker-selection-details">
+			<div class="datetimepicker-selection-from is-hidden"></div>
+			<div class="datetimepicker-selection-start">
+				<div class="datetimepicker-selection-wrapper">
+					<div class="datetimepicker-selection-day">--</div>
+					<div class="datetimepicker-selection-date">
+						<div class="datetimepicker-selection-month"></div>
+						<div class="datetimepicker-selection-weekday is-hidden">Monday</div>
+					</div>
+				</div>
+				
+			</div>
+		</div>
+		
+		<div class="datetimepicker-selection-details">
+			<div class="datetimepicker-selection-to is-hidden"></div>
+			<div class="datetimepicker-selection-end">
+				<div class="datetimepicker-selection-wrapper">
+					<div class="datetimepicker-selection-day">--</div>
+					<div class="datetimepicker-selection-date">
+						<div class="datetimepicker-selection-month"></div>
+						<div class="datetimepicker-selection-weekday is-hidden">Friday</div>
+					</div>
+				</div>
+				
+			</div>
+		</div>
+	</div>
+<div class="column is-4">
+  <div class="calendar">
+  <div class="calendar-nav">
+    <div class="calendar-nav-left">
+      <button class="button is-link">
+        <i class="fa fa-chevron-left"></i>
+      </button>
+    </div>
+    <div>March 2017</div>
+    <div class="calendar-nav-right">
+      <button class="button is-link">
+        <i class="fa fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+  <div class="calendar-container">
+    <div class="calendar-header">
+      <div class="calendar-date">Sun</div>
+      <div class="calendar-date">Mon</div>
+      <div class="calendar-date">Tue</div>
+      <div class="calendar-date">Wed</div>
+      <div class="calendar-date">Thu</div>
+      <div class="calendar-date">Fri</div>
+      <div class="calendar-date">Sat</div>
+    </div>
+    <div class="calendar-body">
+      <div class="calendar-date is-disabled"><button class="date-item">26</button></div>
+      <div class="calendar-date is-disabled"><button class="date-item">27</button></div>
+      <div class="calendar-date is-disabled"><button class="date-item">28</button></div>
+      <div class="calendar-date"><button class="date-item">1</button></div>
+      <div class="calendar-date"><button class="date-item">2</button></div>
+      <div class="calendar-date"><button class="date-item">3</button></div>
+      <div class="calendar-date"><button class="date-item is-today">4</button></div>
+      <div class="calendar-date"><button class="date-item" disabled="">5</button></div>
+      <div class="calendar-date"><button class="date-item">6</button></div>
+      <div class="calendar-date"><button class="date-item">7</button></div>
+      <div class="calendar-date"><button class="date-item badge">8</button></div>
+      <div class="calendar-date"><button class="date-item">9</button></div>
+      <div class="calendar-date"><button class="date-item">10</button></div>
+      <div class="calendar-date"><button class="date-item">11</button></div>
+      <div class="calendar-date"><button class="date-item">12</button></div>
+      <div class="calendar-date"><button class="date-item">13</button></div>
+      <div class="calendar-date"><button class="date-item">14</button></div>
+      <div class="calendar-date"><button class="date-item">15</button></div>
+      <div class="calendar-date calendar-range range-start"><button class="date-item is-active">16</button></div>
+      <div class="calendar-date calendar-range"><button class="date-item">17</button></div>
+      <div class="calendar-date calendar-range"><button class="date-item">18</button></div>
+      <div class="calendar-date calendar-range"><button class="date-item">19</button></div>
+      <div class="calendar-date calendar-range range-end"><button class="date-item is-active">20</button></div>
+      <div class="calendar-date"><button class="date-item">21</button></div>
+      <div class="calendar-date"><button class="date-item">22</button></div>
+      <div class="calendar-date"><button class="date-item">23</button></div>
+      <div class="calendar-date"><button class="date-item">24</button></div>
+      <div class="calendar-date"><button class="date-item">25</button></div>
+      <div class="calendar-date"><button class="date-item">26</button></div>
+      <div class="calendar-date"><button class="date-item">27</button></div>
+      <div class="calendar-date"><button class="date-item">28</button></div>
+      <div class="calendar-date"><button class="date-item">29</button></div>
+      <div class="calendar-date"><button class="date-item">30</button></div>
+      <div class="calendar-date"><button class="date-item">31</button></div>
+      <div class="calendar-date is-disabled"><button class="date-item">1</button></div>
+    </div>
+  </div>
+</div>
+</div>
 
+<br /><br />
+<div class="calendar is-calendar-large">
+  <div class="calendar-nav">
+    <div class="calendar-nav-left">
+      <button class="button is-link">
+        <i class="fa fa-chevron-left"></i>
+      </button>
+    </div>
+    <div>March 2017</div>
+    <div class="calendar-nav-right">
+      <button class="button is-link">
+        <i class="fa fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+  <div class="calendar-container">
+    <div class="calendar-header">
+      <div class="calendar-date">Sun</div>
+      <div class="calendar-date">Mon</div>
+      <div class="calendar-date">Tue</div>
+      <div class="calendar-date">Wed</div>
+      <div class="calendar-date">Thu</div>
+      <div class="calendar-date">Fri</div>
+      <div class="calendar-date">Sat</div>
+    </div>
+    <div class="calendar-body">
+      <div class="calendar-date disabled"><button class="date-item">26</button></div>
+      <div class="calendar-date disabled">
+        <button class="date-item">27</button>
+        <div class="calendar-events">
+          <a class="calendar-event">Default event</a>
+        </div>
+      </div>
+      <div class="calendar-date disabled"><button class="date-item">28</button></div>
+      <div class="calendar-date"><button class="date-item">1</button></div>
+      <div class="calendar-date"><button class="date-item">2</button></div>
+      <div class="calendar-date"><button class="date-item">3</button></div>
+      <div class="calendar-date tooltip" data-tooltip="Today"><button class="date-item date-today">4</button></div>
+      <div class="calendar-date"><button class="date-item" disabled="">5</button></div>
+      <div class="calendar-date"><button class="date-item">6</button></div>
+      <div class="calendar-date"><button class="date-item">7</button></div>
+      <div class="calendar-date tooltip" data-tooltip="You have appointments">
+        <button class="date-item badge">8</button>
+        <div class="calendar-events">
+          <a class="calendar-event is-primary">Primary event</a>
+          <a class="calendar-event is-warning">Warning event</a>
+          <a class="calendar-event is-danger">Danger event</a>
+        </div>
+      </div>
+      <div class="calendar-date"><button class="date-item">9</button></div>
+      <div class="calendar-date"><button class="date-item">10</button></div>
+      <div class="calendar-date"><button class="date-item">11</button></div>
+      <div class="calendar-date">
+        <button class="date-item">12</button>
+        <div class="calendar-events">
+          <a class="calendar-event">Default event</a>
+        </div>
+      </div>
+      <div class="calendar-date"><button class="date-item">13</button></div>
+      <div class="calendar-date"><button class="date-item">14</button></div>
+      <div class="calendar-date"><button class="date-item">15</button></div>
+      <div class="calendar-date calendar-range range-start"><button class="date-item is-active">16</button></div>
+      <div class="calendar-date calendar-range"><button class="date-item">17</button></div>
+      <div class="calendar-date calendar-range"><button class="date-item">18</button></div>
+      <div class="calendar-date calendar-range"><button class="date-item">19</button></div>
+      <div class="calendar-date calendar-range range-end">
+        <button class="date-item is-active">20</button>
+        <div class="calendar-events">
+          <a class="calendar-event is-success">Success event</a>
+        </div>
+      </div>
+      <div class="calendar-date"><button class="date-item">21</button></div>
+      <div class="calendar-date"><button class="date-item">22</button></div>
+      <div class="calendar-date"><button class="date-item">23</button></div>
+      <div class="calendar-date"><button class="date-item">24</button></div>
+      <div class="calendar-date"><button class="date-item">25</button></div>
+      <div class="calendar-date"><button class="date-item">26</button></div>
+      <div class="calendar-date"><button class="date-item">27</button></div>
+      <div class="calendar-date"><button class="date-item">28</button></div>
+      <div class="calendar-date"><button class="date-item">29</button></div>
+      <div class="calendar-date"><button class="date-item">30</button></div>
+      <div class="calendar-date"><button class="date-item">31</button></div>
+      <div class="calendar-date disabled">
+        <button class="date-item">1</button>
+        <div class="calendar-events">
+          <a class="calendar-event">Second default event</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
 
 <!-- <div class="calendar-date is-disabled"><button class="date-item">26</button></div>
       <div class="calendar-date is-disabled"><button class="date-item">27</button></div>
