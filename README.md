@@ -2,32 +2,17 @@ This is a date time range picker done with Angular 5, Bulma.css and Moment.js.
 
 You can use this component as both a single date picker as well as range including time picker(includes start date, end date and time)
 
-The behaviour can be controlled through the parent component. Following are the configurable inputs:
+The behaviour can be controlled through the parent component. Following are the properties:
 
-1) isRange: boolean;
-
-  It provides option to pick end date if true, hides the option if false.
-
-2) hasTime: boolean;
-
-  It provides option to pick time if true, hides the option if false.
-
-3) startDate: any; (moment)
-  
-  To set start date of the date range. (In simple datepicker mode, it is the default date)
-
-4) endDate: any; (moment)
-
-  To set end date of the date range.
-  
-5) minDate: any; (moment)
-  
-  To set minimum available date that can be selected by the user. (By default it is today's date)
-
-6) maxDate: any; (moment)
-  
-  To set maximum available date that can be selected by the user. (By default it is current day and month of next year)
-  
+| Property      | Description   | Type  | Default  |
+| :------------- | :----------: | -----------: | :------------- | 
+| isRange | provides option to pick end date if true, hides the option if false | boolean  | - |
+| hasTime | It provides option to pick time if true, hides the option if false. | boolean | - |
+| startDate | To set start date of the date range (In simple datepicker mode, it is the default date) | any (moment) | - |
+| endDate | To set end date of the date range | any (moment) | - |
+| minDate  | To set minimum available date that can be selected by the user | any (moment) | today's date |
+| maxDate |  To set maximum available date that can be selected by the user| any (moment) | current day and month of next year |
+| emitSelected |  To set maximum available date that can be selected by the user. (By default it is current day and month of next year) | EventEmitter | - |
 
 You may fork it and contribute as I have from JoniWanKenobi/angular-bulma-datepicker. 
 
@@ -38,7 +23,7 @@ Improvements from original repository:
 - Refactored to implement sound Angular practices i.e avoiding functions within the template.
 
 
-# AngularBulmaDatepicker
+# AngularBulmaDateTimeRangeicker
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.7.2.
 
