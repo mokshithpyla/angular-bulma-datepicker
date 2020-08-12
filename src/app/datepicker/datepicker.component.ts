@@ -8,8 +8,8 @@ import * as moment from 'moment';
 })
 export class DatepickerComponent implements OnInit {
 
-  @Input() isRange: boolean = false;
-  @Input() hasTime: boolean = false;
+  @Input() isRange: boolean;
+  @Input() hasTime: boolean;
   @Input() startDate: any = moment();
   @Input() endDate: any;
   @Input() minDate: any;
@@ -26,7 +26,7 @@ export class DatepickerComponent implements OnInit {
   todaysDate = moment().set({ hour:0, minute:0, second:0, millisecond:0 });
   startDay: any;
   endDay: any;
-  mode = 'start';
+  mode = 'end';
   initialEmptyCells: number;
   lastEmptyCells: number;
   arrayLength: number;
@@ -36,13 +36,15 @@ export class DatepickerComponent implements OnInit {
   startTime: any;
   endTime: any;
   isInvalid: boolean = false;
-  showCalendar: boolean = false;
+  includeEndDate: boolean;
+  includeTime: boolean;
 
   @ViewChild("startTimePicker") startTimePicker: ElementRef;
   @ViewChild("endTimePicker") endTimePicker: ElementRef;
   constructor() { }
 
   ngOnInit() {
+    this.setOptions();
     moment.locale(this.locale);
     if (!this.startDate) {
       this.startDate = moment();
@@ -52,6 +54,11 @@ export class DatepickerComponent implements OnInit {
     this.currentMonth = this.navDate.month();
     this.currentYear = this.navDate.year();
     this.makeGrid(this.currentYear, this.currentMonth);     
+  }
+
+  setOptions() {
+    this.includeEndDate = this.isRange;
+    this.includeTime = this.hasTime;
   }
 
   setAccess() {
@@ -144,7 +151,7 @@ export class DatepickerComponent implements OnInit {
   selectDay(day: any) {
     if (day.available) {
       this.selectedDate = this.dateFromDayAndMonthAndYear(day.value, day.month, day.year);
-      if (this.isRange) {
+      if (this.includeEndDate) {
         const currDate = this.dateFromDayAndMonthAndYear(day.value, day.month, day.year)
         switch(this.mode) {
           case 'end':
@@ -319,8 +326,8 @@ export class DatepickerComponent implements OnInit {
     this.navDate = this.todaysDate;
     this.currentMonth = this.navDate.month();
     this.currentYear = this.navDate.year();
-    this.isRange = false;
-    this.hasTime = false;
+    this.includeEndDate = false;
+    this.includeTime = false;
     this.startTime = null;
     this.endTime = null;
     this.mode = 'start';
@@ -337,7 +344,7 @@ export class DatepickerComponent implements OnInit {
     if (this.startDay) {
       this.startDay.isActive = true;
     }
-    if (!this.isRange) {
+    if (!this.includeEndDate) {
       this.endDate = null;
       this.mode = 'start';
       this.startDay.isActive = false;
@@ -430,13 +437,5 @@ export class DatepickerComponent implements OnInit {
       this.endDate = moment;
       this.endTimePicker.nativeElement.blur();
     }
-  }
-
-  toggleCalendar() {
-    this.showCalendar = !this.showCalendar;
-  }
-
-  hideCalendar() {
-    this.showCalendar = false;
   }
 }

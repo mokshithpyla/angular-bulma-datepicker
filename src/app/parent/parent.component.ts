@@ -8,8 +8,8 @@ import { Component, OnInit } from '@angular/core';
 export class ParentComponent implements OnInit {
 
   selectedDate: any;
-  isRange: boolean = false;
-  hasTime: boolean = false;
+  isRange: boolean = true;
+  hasTime: boolean = true;
   startDate: any;
   endDate: any;
   maxDate: any;

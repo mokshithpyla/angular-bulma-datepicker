@@ -1,13 +1,13 @@
 <div class="calendar">
   <div>
-    <div (click)="changeMode('start')" class="datetimepicker-selection-start" [ngClass]="{'bg-blue': mode === 'start' && isRange, 'bg-red': isInvalid }">
+    <div (click)="changeMode('start')" class="datetimepicker-selection-start" [ngClass]="{'bg-blue': mode === 'start' && includeEndDate, 'bg-red': isInvalid }">
       <div *ngIf="startDate" class="w33p align-left">
         {{ startDate.format('D MMM, YYYY') }}
       </div>
       <div *ngIf="!startDate" class="w33p align-left">
         Pick date
       </div>
-      <div *ngIf="hasTime" class="w56p align-right">
+      <div *ngIf="includeTime" class="w56p align-right">
         <div *ngIf="startDate">
           <input 
             #startTimePicker
@@ -23,14 +23,14 @@
         </div>
       </div>
     </div>
-    <div (click)="changeMode('end')" *ngIf="isRange" class="datetimepicker-selection-start" [ngClass]="{'bg-blue': mode === 'end' && isRange}"> 
+    <div (click)="changeMode('end')" *ngIf="includeEndDate" class="datetimepicker-selection-start" [ngClass]="{'bg-blue': mode === 'end' && includeEndDate}"> 
       <div *ngIf="endDate" class="w33p align-left">
         {{ endDate.format('D MMM, YYYY') }}
       </div>
       <div *ngIf="!endDate" class="w33p align-left"> 
         Pick date
       </div>
-      <div *ngIf="hasTime" class="w56p align-right">
+      <div *ngIf="includeTime" class="w56p align-right">
         <div *ngIf="endDate">
           <input 
             #endTimePicker
@@ -71,7 +71,7 @@
         {{day}}
       </div>
     </div>
-    <div class="calendar-body" *ngIf="isRange; else notRange">
+    <div class="calendar-body" *ngIf="includeEndDate; else notRange">
       <ng-container *ngIf="gridArr">
         <div *ngFor = "let day of gridArr[currentYear][currentMonth]" class="calendar-date"
           [ngClass]="{
@@ -101,7 +101,7 @@
         </div>
       </div>
     </ng-template>
-    <div class="pb10 flex">
+    <div class="pb10 flex" *ngIf="isRange">
       <div class="w33p align-left pl10">
         <label>
           End date
@@ -109,12 +109,12 @@
       </div>
       <div class="w56p align-right">
         <label class="switch">
-          <input type="checkbox" [(ngModel)]="isRange" (change)="handleModeChange()">
+          <input type="checkbox" [(ngModel)]="includeEndDate" (change)="handleModeChange()">
           <span class="slider round"></span>
         </label>
       </div>
     </div>
-    <div class="pb10 flex">
+    <div class="pb10 flex" *ngIf="hasTime">
       <div class="w33p align-left pl10">
         <label>
           Include time
@@ -122,7 +122,7 @@
       </div>
       <div class="w56p align-right">
         <label class="switch">
-          <input type="checkbox" [(ngModel)]="hasTime">
+          <input type="checkbox" [(ngModel)]="includeTime">
           <span class="slider round"></span>
         </label>
       </div>
