@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 
-import * as moment from 'moment';
-
 @Component({
   selector: 'app-parent',
   templateUrl: './parent.component.html',
@@ -9,32 +7,16 @@ import * as moment from 'moment';
 })
 export class ParentComponent implements OnInit {
 
-  locale: string = 'en';
   selectedDate: any;
-
+  isRange: boolean = true;
+  hasTime: boolean = true;
+  startDate: any;
+  endDate: any;
+  maxDate: any;
+  minDate: any;
   constructor() { }
 
   ngOnInit() {
-  }
-
-  setSelectedDate(date){
-    this.selectedDate = date;
-  }
-
-  canChangeMonthLogic(num, currentDate){
-    currentDate.add(num, 'month');
-    const minDate = moment().add(-1, 'month');
-    const maxDate = moment().add(1, 'year');
-    
-    return currentDate.isBetween(minDate, maxDate);
-  }
-
-  isAvailableLogic(dateToCheck: any){
-    if(dateToCheck.isBefore(moment(), 'day')){
-      return false;
-      } else {
-          return true;
-      }
   }
 
 }

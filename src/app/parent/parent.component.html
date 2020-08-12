@@ -1,9 +1,8 @@
 <app-datepicker 
-  [locale] = "locale"
-  (emitSelectedDate) = "setSelectedDate($event)"
-  [canChangeNavMonthLogic] = "canChangeMonthLogic"
-  [isAvailableLogic] = "isAvailableLogic"
+  [isRange]="isRange"
+  [hasTime]="hasTime"
+  [startDate]="startDate"
+  [endDate]="endDate"
+  [maxDate]="maxDate"
+  [minDate]="minDate"
   ></app-datepicker>
-
-  <h4 class="title is-4">Selected day:</h4>
-  <h4 class="subtitle" *ngIf = "selectedDate">{{selectedDate.format('dddd MMMM Do YYYY')}}</h4>
