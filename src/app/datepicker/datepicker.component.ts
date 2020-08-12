@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
 import * as moment from 'moment';
 
 @Component({
@@ -32,11 +32,14 @@ export class DatepickerComponent implements OnInit {
   arrayLength: number;
   currentMonth: number;
   currentYear: number;
-  formats = ['AM', 'PM'];
-  stFormat: string = 'AM';
-  etFormat: string = 'AM';
   selected: any;
+  startTime: any;
+  endTime: any;
+  isInvalid: boolean = false;
+  showCalendar: boolean = false;
 
+  @ViewChild("startTimePicker") startTimePicker: ElementRef;
+  @ViewChild("endTimePicker") endTimePicker: ElementRef;
   constructor() { }
 
   ngOnInit() {
@@ -130,7 +133,7 @@ export class DatepickerComponent implements OnInit {
 
   isToday(num: number, month: number, year: number): boolean {
     const dateToCheck = moment(this.dateFromDayAndMonthAndYear(num, month, year));
-    return dateToCheck.isSame(moment(this.todaysDate));
+    return dateToCheck.isSame(moment().set({ hour:0, minute:0, second:0, millisecond:0 }));
   }
 
   dateFromNum(num: number, referenceDate: any): any{
@@ -145,7 +148,7 @@ export class DatepickerComponent implements OnInit {
         const currDate = this.dateFromDayAndMonthAndYear(day.value, day.month, day.year)
         switch(this.mode) {
           case 'end':
-            if (currDate.isSame(this.startDate)) {
+            if (currDate.isSame(moment(this.startDate).startOf('day'))) {
               this.mode = 'start';
             }
             else if (currDate.isSameOrBefore(this.startDate)) {
@@ -158,7 +161,7 @@ export class DatepickerComponent implements OnInit {
             }
             break;
           case 'start':
-            if (currDate.isSame(this.endDate)) {
+            if (currDate.isSame(moment(this.endDate).startOf('day'))) {
               this.mode = 'end';
             }
             else if (currDate.isSameOrAfter(this.endDate)) {
@@ -171,8 +174,8 @@ export class DatepickerComponent implements OnInit {
             }
             break; 
         }
-        this.startDate = this.dateFromDayAndMonthAndYear(this.startDay.value, this.startDay.month, this.startDay.year);
-        this.endDate = this.dateFromDayAndMonthAndYear(this.endDay.value, this.endDay.month, this.endDay.year);
+        this.startDate =  this.generateDate(this.startDay, this.startDate)
+        this.endDate = this.generateDate(this.endDay, this.endDate);
         this.applyRange();
         this.startDay.isActive = true;
         this.endDay.isActive = true;
@@ -194,6 +197,14 @@ export class DatepickerComponent implements OnInit {
         this.emitSelected.emit(this.selected);
       }
     }
+  }
+
+  generateDate(day: any, date: any) {
+    let generatedDate = this.dateFromDayAndMonthAndYear(day.value, day.month, day.year);
+    if (date) {
+      generatedDate = generatedDate.set({hour: date.hour(), minute: date.minute()});
+    }
+    return generatedDate;
   }
 
   resetRange() {
@@ -305,80 +316,19 @@ export class DatepickerComponent implements OnInit {
     this.resetRange();
     this.startDate = null;
     this.endDate = null;
-    // this.startDay = null;
-    // this.endDay = null;
     this.navDate = this.todaysDate;
     this.currentMonth = this.navDate.month();
     this.currentYear = this.navDate.year();
     this.isRange = false;
     this.hasTime = false;
+    this.startTime = null;
+    this.endTime = null;
     this.mode = 'start';
     this.makeGrid(this.currentYear, this.currentMonth);
   }
 
-  setTime(time, hour, minute) {
-    return time.set({ hour: hour, minute: minute, second:0, millisecond:0 });
-  }
-
-  updateHours() {
-    if (this.mode === 'start') {
-      switch (this.stFormat) {
-        case 'AM':
-          this.startDate = this.setTime(this.startDate, this.stHours, this.stMinutes);
-          break;
-        case 'PM':
-          this.startDate = this.setTime(this.startDate, this.stHours + 12, this.stMinutes);
-          break;
-      }
-    }
-    else {
-      switch (this.etFormat) {
-        case 'AM':
-          this.endDate = this.setTime(this.endDate, this.etHours, this.etMinutes);
-          break;
-        case 'PM':
-          this.endDate = this.setTime(this.endDate, this.etHours + 12, this.etMinutes);
-          break;
-      }
-    }
-  }
-
-  updateMinutes() {
-    switch(this.mode) {
-      case 'start': 
-        this.startDate = this.setTime(this.startDate, this.stHours, this.stMinutes);
-        break;
-      case 'end':
-        this.endDate = this.setTime(this.endDate, this.etHours, this.etMinutes);
-        break;
-    }
-  }
-
-  updateAMPM(format) {
-    if (this.mode === 'start') {
-      this.stFormat = format;
-    }
-    else {
-      this.etFormat = format;
-    }
-    this.updateHours();
-    this.updateMinutes();
-  }
-
-  get stHours() {
-    return this.startDate.hours() == 0? 12: this.startDate.hours();
-  }
-
-  get stMinutes() {
-    return this.startDate.minutes();
-  }
-
-  get etHours() {
-    return this.endDate.hours() == 0? 12: this.endDate.hours();
-  }
-
-  get etMinutes() {
-    return this.endDate.minutes();
+  setTime(moment, hour: number = 0, minute: number = 0) {
+    return moment.set({ hour: hour, minute: minute, second:0, millisecond:0 });
   }
 
   handleModeChange() {
@@ -393,5 +343,100 @@ export class DatepickerComponent implements OnInit {
       this.startDay.isActive = false;
       this.endDay.isActive = false;
     }
+  }
+
+  setStartTime(time) {
+    this.startTime = time;
+  }
+
+  setEndTime(time) {
+    this.endTime = time;
+  }
+  
+  handleTimeChange(time: any, moment: any, mode: string) {
+    if (!time) {
+      return;
+    }
+    time = time.replace(/[^a-zA-Z0-9]/g, "");
+    moment.set({ hour:0, minute:0, second:0, millisecond:0 });
+    let lastTwo = time.substr(time.length - 2).toUpperCase();
+    let last = time.substr(time.length - 1).toUpperCase();
+    const hasLastTwo = ['AM', 'PM'].includes(lastTwo);
+    const hasLast = ['A', 'P'].includes(last);
+    let isAm = true;
+    let isPm = false;
+    if (hasLast || hasLastTwo) {
+      isAm = last == 'A' || lastTwo == 'AM';
+      isPm = last == 'P' || lastTwo == 'PM'
+    }
+    time = time.replace(/[^0-9]/g, "");
+    lastTwo = time.substr(time.length - 2);
+    last = time.substr(time.length - 1);
+    time = time.substr(0, 4);
+    this.isInvalid = false;
+    switch (time.length) {
+      case 1:
+        moment
+        = isAm ? this.setTime(moment, Number(time)) :
+                 this.setTime(moment, Number(time) + 12);
+        break;
+      case 2: if (last >= 6) {
+          this.isInvalid = true;
+          break;
+        }
+        if (time == 12) {
+          moment 
+          = isAm ? this.setTime(moment, 0) :
+                   this.setTime(moment, 12);
+        }
+        else if (time < 12) {
+          moment 
+          = isAm ? this.setTime(moment, Number(time)) :
+                   this.setTime(moment, Number(time) + 12);
+        } 
+        else {
+          moment 
+          = isAm ? this.setTime(moment, Number(time[0]), Number(last)) :
+                   this.setTime(moment, Number(time[0]) + 12, Number(last));
+        }
+        break;
+      case 3:
+        if (lastTwo >= 60) {
+          this.isInvalid = true;
+          break;
+        }
+        else {
+          moment 
+          = isAm ? this.setTime(moment, Number(time[0]), Number(lastTwo)) :
+                   this.setTime(moment, Number(time[0]) + 12, Number(lastTwo));
+        }
+        break;
+      case 4:
+        if (lastTwo >= 60) {
+          this.isInvalid = true;
+          break;
+        }
+        moment = this.setTime(moment, Number(time.substr(0, 2)), Number(lastTwo))
+        break;
+      default: 
+        this.isInvalid = true;
+        break;
+    }
+    if (mode === 'start') {      
+      this.startDate = moment;
+      this.startTimePicker.nativeElement.blur();
+    }
+    else {
+      this.endDate = moment;
+      this.endTimePicker.nativeElement.blur();
+    }
+  }
+
+  toggleCalendar() {
+    this.showCalendar = !this.showCalendar;
+  }
+
+  hideCalendar() {
+    this.showCalendar = false;
   }
 }
