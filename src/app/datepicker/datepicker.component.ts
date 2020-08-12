@@ -199,6 +199,7 @@ export class DatepickerComponent implements OnInit {
         this.selected = {
           startDate: this.startDate
         }
+        this.emitSelected.emit(this.selected);
       }
       if (this.startDate && this.endDate) {
         this.emitSelected.emit(this.selected);
