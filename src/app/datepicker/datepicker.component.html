@@ -18,7 +18,7 @@
             (keyup.enter)="handleTimeChange(startTime, startDate, 'start')"
           >
         </div>
-        <div *ngIf="!startDate">
+        <div *ngIf="!startDate" class="w56p align-right">
           --
         </div>
       </div>
@@ -41,7 +41,7 @@
             (keyup.enter)="handleTimeChange(endTime, endDate, 'end')"
           >
         </div>
-        <div *ngIf="!endDate">
+        <div *ngIf="!endDate" class="w56p align-right">
           --
         </div>
       </div>
