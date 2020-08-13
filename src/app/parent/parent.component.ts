@@ -7,7 +7,6 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ParentComponent implements OnInit {
 
-  selectedDate: any;
   isRange: boolean = true;
   hasTime: boolean = true;
   startDate: any;
