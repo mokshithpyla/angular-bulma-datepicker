@@ -1,5 +1,7 @@
 This is a date time range picker done with Angular 5, Bulma.css and Moment.js. 
 
+I have documented the process of building this in this medium post: https://medium.com/@mokshithnathpyla/building-a-date-time-range-picker-with-angular-bulma-and-moment-js-16cb8ed9d140
+
 You can use this component as both a single date picker as well as range including time picker(includes start date, end date and time)
 
 The behaviour can be controlled through the parent component. Following are the properties:
